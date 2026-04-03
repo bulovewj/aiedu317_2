@@ -5,3 +5,9 @@ mediapipe>=0.10.9
 opencv-python-headless>=4.9.0
 av>=11.0.0
 numpy>=1.24.0
+libgl1-mesa-glx
+libglib2.0-0
+libsm6
+libxext6
+libxrender-dev
+libgomp1
