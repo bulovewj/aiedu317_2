@@ -12,6 +12,7 @@ st.markdown("웹캠을 켜고 손을 보여주세요!")
 # MediaPipe 초기화
 mp_hands = mp.solutions.hands
 mp_draw = mp.solutions.drawing_utils
+mp_drawing_styles = mp.solutions.drawing_styles
 
 
 def count_fingers(hand_landmarks):
@@ -62,7 +63,13 @@ class HandGestureProcessor(VideoProcessorBase):
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 # 손 랜드마크 그리기
-                mp_draw.draw_landmarks(img, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+                mp_draw.draw_landmarks(
+                    img,
+                    hand_landmarks,
+                    mp_hands.HAND_CONNECTIONS,
+                    mp_drawing_styles.get_default_hand_landmarks_style(),
+                    mp_drawing_styles.get_default_hand_connections_style(),
+                )
 
                 # 제스처 인식
                 count = count_fingers(hand_landmarks)
