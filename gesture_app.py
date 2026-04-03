@@ -4,7 +4,7 @@ import cv2
 import av
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 
-st.set_page_config(page_title="손가락 제스처 인식", layout="centered")
+st.set_page_config(page_title="손가락 제스처 인식", layout="wide")
 st.title("✋ 손가락 제스처 인식")
 st.markdown("웹캠을 켜고 손을 보여주세요!")
 
@@ -67,13 +67,19 @@ with st.expander("인식 가능한 제스처"):
 | 🖐️ | 5 |
 """)
 
-ctx = webrtc_streamer(
-    key="hand-gesture",
-    video_processor_factory=HandGestureProcessor,
-    media_stream_constraints={"video": True, "audio": False},
-    async_processing=True,
-)
+col1, col2 = st.columns(2)
 
-if ctx.video_processor:
-    st.subheader("인식된 제스처:")
-    st.markdown(f"## {ctx.video_processor.gesture_label}")
+with col1:
+    ctx = webrtc_streamer(
+        key="hand-gesture",
+        video_processor_factory=HandGestureProcessor,
+        media_stream_constraints={"video": True, "audio": False},
+        async_processing=True,
+    )
+    if ctx.video_processor:
+        st.subheader("인식된 제스처:")
+        st.markdown(f"## {ctx.video_processor.gesture_label}")
+
+with col2:
+    st.subheader("영역전개")
+    st.info("이 영역에 내용을 추가할 수 있습니다.")
