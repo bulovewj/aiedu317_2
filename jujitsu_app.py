@@ -13,455 +13,519 @@ st.set_page_config(
     page_title="呪術廻戦 領域展開",
     page_icon="🔮",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 # ──────────────────────────────────────────
-# CSS 스타일
+# CSS
 # ──────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@900&display=swap');
 
-html, body, [data-testid="stAppViewContainer"] {
+html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     background: #0a0a0a !important;
     color: #e0e0e0;
 }
-[data-testid="stSidebar"] {
-    background: #111 !important;
-    border-right: 1px solid #333;
-}
-[data-testid="stSidebar"] * { color: #e0e0e0 !important; }
-h1, h2, h3 { color: #c0392b !important; }
+[data-testid="stSidebar"] { background: #111 !important; }
+[data-testid="stHeader"]  { background: transparent !important; }
 
-/* ── 영역전개 오버레이 ── */
-#domain-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-    overflow: hidden;
-    pointer-events: none;
-}
-#domain-overlay.active { display: block; }
+h1 { color: #c0392b !important; }
 
-.domain-bg {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center,
-        rgba(139,0,0,0.96) 0%,
-        rgba(20,0,0,0.98) 55%,
-        rgba(0,0,0,1) 100%);
-    animation: domainPulse 1.8s ease-in-out infinite alternate;
-}
-@keyframes domainPulse {
-    from { opacity: 0.8; }
-    to   { opacity: 1;   }
-}
-
-.crack {
-    position: absolute;
-    background: linear-gradient(90deg, transparent, #FF4500, transparent);
-    height: 2px; width: 100%;
-    animation: crackFlicker 0.25s infinite;
-}
-@keyframes crackFlicker {
-    0%,100% { opacity:1;   }
-    50%     { opacity:0.2; }
-}
-
-.curse-circle {
-    position: absolute;
-    top:50%; left:50%;
-    border-radius:50%;
-    border: 2px solid rgba(255,69,0,0.55);
-    animation: circleRotate 8s linear infinite;
-}
-@keyframes circleRotate {
-    from { transform: translate(-50%,-50%) rotate(0deg);   }
-    to   { transform: translate(-50%,-50%) rotate(360deg); }
-}
-
-.domain-text {
-    position: absolute;
-    top:44%; left:50%;
-    transform: translate(-50%,-50%);
-    font-family: 'Noto Serif JP', serif;
-    font-size: clamp(2.5rem, 7vw, 5.5rem);
-    font-weight: 900;
-    color: #FFD700;
-    text-shadow: 0 0 12px #FF4500, 0 0 35px #FF4500,
-                 0 0 70px #8B0000, 0 0 120px #FF0000;
-    white-space: nowrap;
-    letter-spacing: 0.35em;
-    animation: textAppear 0.8s ease-out forwards,
-               textGlow 2.5s ease-in-out infinite alternate 0.8s;
-    opacity: 0;
-}
-@keyframes textAppear {
-    from { opacity:0; transform:translate(-50%,-50%) scale(0.4); }
-    to   { opacity:1; transform:translate(-50%,-50%) scale(1);   }
-}
-@keyframes textGlow {
-    from { text-shadow: 0 0 12px #FF4500, 0 0 35px #FF4500; }
-    to   { text-shadow: 0 0 25px #FFD700, 0 0 70px #FF4500, 0 0 120px #FF0000; }
-}
-
-.domain-subtitle {
-    position: absolute;
-    top:60%; left:50%;
-    transform: translateX(-50%);
-    font-family: 'Noto Serif JP', serif;
-    font-size: clamp(1.1rem, 3.5vw, 2.2rem);
-    color: rgba(255,215,0,0.85);
-    letter-spacing: 0.25em;
-    animation: textAppear 1.2s ease-out 0.4s forwards;
-    opacity: 0;
-}
-
-.domain-close-btn {
-    position: absolute;
-    top:18px; right:28px;
-    font-size:2.2rem;
-    color: rgba(255,215,0,0.7);
-    cursor: pointer;
-    pointer-events: all;
-    z-index: 100000;
-    line-height: 1;
-    user-select: none;
-}
-.domain-close-btn:hover { color:#FFD700; }
-
-.particle {
-    position: absolute;
-    border-radius: 50%;
-    animation: floatUp linear infinite;
-    pointer-events: none;
-}
-@keyframes floatUp {
-    from { transform:translateY(105vh) scale(1); opacity:0.85; }
-    to   { transform:translateY(-8vh) scale(0);  opacity:0;    }
-}
-
-/* ── UI 컴포넌트 ── */
 .stButton > button {
-    background: linear-gradient(135deg,#8B0000,#4a0000) !important;
+    background: linear-gradient(135deg, #8B0000, #4a0000) !important;
     color: #FFD700 !important;
     border: 1px solid #FF4500 !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
     font-weight: bold !important;
-    letter-spacing: 0.08em !important;
+    font-size: 1.1rem !important;
+    letter-spacing: 0.1em !important;
+    padding: 0.6rem 1.2rem !important;
     transition: all 0.2s !important;
+    width: 100%;
 }
 .stButton > button:hover {
-    background: linear-gradient(135deg,#c0392b,#8B0000) !important;
-    box-shadow: 0 0 18px rgba(255,69,0,0.55) !important;
+    background: linear-gradient(135deg, #c0392b, #8B0000) !important;
+    box-shadow: 0 0 20px rgba(255,69,0,0.6) !important;
+    transform: scale(1.02) !important;
+}
+.stButton > button:disabled {
+    background: #1a1a1a !important;
+    color: #444 !important;
+    border-color: #333 !important;
+    transform: none !important;
 }
 
-.badge {
-    display:inline-block; padding:5px 14px;
-    border-radius:20px; font-size:0.82rem;
-    font-weight:bold; letter-spacing:0.04em; margin:3px;
+.domain-card {
+    background: #161616;
+    border: 2px solid #333;
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin: 8px 0;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
-.badge-on  { background:#8B0000; color:#FFD700; border:1px solid #FF4500; }
-.badge-off { background:#1a1a1a; color:#777;    border:1px solid #333; }
-.badge-ok  { background:#103010; color:#00EE00; border:1px solid #009900; }
-.badge-warn{ background:#2a1a00; color:#FFA500; border:1px solid #FF8C00; }
-
-.ibox {
-    background:#161616; border-left:3px solid #FF4500;
-    padding:10px 15px; border-radius:0 8px 8px 0;
-    margin:7px 0; font-size:0.88rem; color:#ccc; line-height:1.65;
+.domain-card:hover {
+    border-color: #FF4500;
+    background: #1f1010;
+    box-shadow: 0 0 12px rgba(255,69,0,0.3);
 }
-
-.pcard {
-    background:#1a1a1a; border:1px solid #333;
-    border-radius:9px; padding:10px 13px; margin:5px 0;
-    transition: border-color 0.2s, background 0.2s;
+.domain-card.active {
+    border-color: #FFD700;
+    background: #2a1500;
+    box-shadow: 0 0 18px rgba(255,215,0,0.4);
 }
-.pcard.sel { border-color:#FF4500; background:#2a1010; }
-.pcard-t   { color:#FFD700; font-weight:bold; font-size:0.95rem; }
-.pcard-d   { color:#999; font-size:0.78rem; margin-top:3px; }
-
-.gauge-bg  { background:#222; border-radius:4px; height:14px; overflow:hidden; margin:4px 0; }
-.gauge-bar { height:100%; border-radius:4px; transition:width 0.4s; }
-
-.result-card {
-    background:#161616; border:1px solid #333;
-    border-radius:12px; padding:18px; margin:10px 0;
+.domain-card-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #FFD700;
+    margin-bottom: 3px;
 }
-.result-title {
-    font-family:'Noto Serif JP',serif;
-    font-size:1.6rem; font-weight:900;
-    letter-spacing:0.2em; margin-bottom:6px;
+.domain-card-jp {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+}
+.domain-card-pose {
+    font-size: 0.78rem;
+    color: #888;
+    margin-top: 4px;
 }
 
-hr { border-color:#2a2a2a !important; }
+.status-box {
+    background: #161616;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 10px 0;
+    border: 1px solid #2a2a2a;
+    font-size: 0.9rem;
+    color: #bbb;
+    line-height: 1.7;
+}
 
-/* 카메라 입력 스타일 */
-[data-testid="stCameraInput"] {
+.gauge-wrap { margin: 8px 0; }
+.gauge-label {
+    font-size: 0.82rem;
+    color: #888;
+    margin-bottom: 3px;
+}
+.gauge-bg {
+    background: #222;
+    border-radius: 6px;
+    height: 16px;
+    overflow: hidden;
+}
+.gauge-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.4s ease;
+}
+
+.hint-box {
+    background: #111;
+    border: 1px dashed #333;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.8rem;
+    color: #666;
+    line-height: 1.8;
+    margin-top: 12px;
+}
+
+hr { border-color: #222 !important; }
+
+/* 카메라 영역 강조 */
+[data-testid="stCameraInput"] > div {
     border: 2px solid #8B0000 !important;
-    border-radius: 8px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 0 20px rgba(139,0,0,0.4) !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ──────────────────────────────────────────
-# 영역전개 오버레이 HTML + JS
+# 영역전개 오버레이 HTML
 # ──────────────────────────────────────────
-st.components.v1.html("""
-<!DOCTYPE html>
+OVERLAY_HTML = """<!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
 <style>
-body { margin:0; padding:0; background:transparent; }
-#domain-overlay {
-    display:none; position:fixed; inset:0;
-    z-index:99999; overflow:hidden; pointer-events:none;
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:transparent; overflow:hidden; }
+
+#overlay {
+    display: none;
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    z-index: 99999;
+    pointer-events: none;
+    overflow: hidden;
 }
-#domain-overlay.active { display:block; }
-.domain-bg {
-    position:absolute; inset:0;
-    background:radial-gradient(ellipse at center,
-        rgba(139,0,0,0.96) 0%, rgba(20,0,0,0.98) 55%, rgba(0,0,0,1) 100%);
-    animation:domainPulse 1.8s ease-in-out infinite alternate;
+#overlay.on { display: block; }
+
+.bg {
+    position: absolute;
+    inset: 0;
+    animation: pulse 2s ease-in-out infinite alternate;
 }
-@keyframes domainPulse { from{opacity:.8} to{opacity:1} }
+@keyframes pulse { from{opacity:.85} to{opacity:1} }
+
 .crack {
-    position:absolute; height:2px; width:100%;
-    background:linear-gradient(90deg,transparent,#FF4500,transparent);
-    animation:crackFlicker 0.25s infinite;
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    animation: flicker 0.3s infinite;
 }
-@keyframes crackFlicker { 0%,100%{opacity:1} 50%{opacity:.2} }
-.curse-circle {
-    position:absolute; top:50%; left:50%; border-radius:50%;
-    border:2px solid rgba(255,69,0,.55);
-    animation:circleRotate 8s linear infinite;
+@keyframes flicker { 0%,100%{opacity:1} 50%{opacity:.15} }
+
+.ring {
+    position: absolute;
+    top:50%; left:50%;
+    border-radius: 50%;
+    animation: spin linear infinite;
 }
-@keyframes circleRotate {
-    from{transform:translate(-50%,-50%) rotate(0deg)}
-    to{transform:translate(-50%,-50%) rotate(360deg)}
+@keyframes spin {
+    from { transform: translate(-50%,-50%) rotate(0deg); }
+    to   { transform: translate(-50%,-50%) rotate(360deg); }
 }
-.domain-text {
-    position:absolute; top:44%; left:50%;
-    transform:translate(-50%,-50%);
-    font-family:'Noto Serif JP',serif;
-    font-size:clamp(2.5rem,7vw,5.5rem); font-weight:900;
-    color:#FFD700; white-space:nowrap; letter-spacing:.35em;
-    text-shadow:0 0 12px #FF4500,0 0 35px #FF4500,0 0 70px #8B0000,0 0 120px #FF0000;
-    animation:textAppear .8s ease-out forwards,textGlow 2.5s ease-in-out infinite alternate .8s;
-    opacity:0;
+
+.main-txt {
+    position: absolute;
+    top:43%; left:50%;
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(2.8rem, 8vw, 6rem);
+    font-weight: 900;
+    color: #FFD700;
+    white-space: nowrap;
+    letter-spacing: 0.4em;
+    animation: appear .7s ease-out forwards,
+               glow 2s ease-in-out infinite alternate .7s;
+    opacity: 0;
 }
-.domain-subtitle {
-    position:absolute; top:60%; left:50%;
-    transform:translateX(-50%);
-    font-family:'Noto Serif JP',serif;
-    font-size:clamp(1.1rem,3.5vw,2.2rem);
-    color:rgba(255,215,0,.85); letter-spacing:.25em;
-    animation:textAppear 1.2s ease-out .4s forwards; opacity:0;
+.sub-txt {
+    position: absolute;
+    top:62%; left:50%;
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(1.2rem, 4vw, 2.4rem);
+    color: rgba(255,215,0,0.9);
+    letter-spacing: 0.3em;
+    animation: fadeIn 1s ease-out .5s forwards;
+    opacity: 0;
 }
-@keyframes textAppear {
-    from{opacity:0;transform:translate(-50%,-50%) scale(.4)}
-    to{opacity:1;transform:translate(-50%,-50%) scale(1)}
+
+@keyframes appear {
+    from { opacity:0; transform:translate(-50%,-50%) scale(.3); }
+    to   { opacity:1; transform:translate(-50%,-50%) scale(1); }
 }
-@keyframes textGlow {
-    from{text-shadow:0 0 12px #FF4500,0 0 35px #FF4500}
-    to{text-shadow:0 0 25px #FFD700,0 0 70px #FF4500,0 0 120px #FF0000}
+@keyframes fadeIn {
+    from { opacity:0; transform:translateX(-50%) translateY(10px); }
+    to   { opacity:1; transform:translateX(-50%) translateY(0); }
 }
-.domain-close-btn {
-    position:absolute; top:18px; right:28px;
-    font-size:2.2rem; color:rgba(255,215,0,.7);
-    cursor:pointer; pointer-events:all; z-index:100000;
-    line-height:1; user-select:none;
+@keyframes glow {
+    from { text-shadow: 0 0 15px #FF4500, 0 0 40px #FF4500; }
+    to   { text-shadow: 0 0 30px #FFD700, 0 0 80px #FF4500, 0 0 140px #FF0000; }
 }
-.domain-close-btn:hover{color:#FFD700}
-.particle {
-    position:absolute; border-radius:50%;
-    animation:floatUp linear infinite; pointer-events:none;
+
+.close-btn {
+    position: absolute;
+    top:20px; right:32px;
+    font-size: 2.5rem;
+    color: rgba(255,215,0,0.65);
+    cursor: pointer;
+    pointer-events: all;
+    z-index: 100001;
+    user-select: none;
+    transition: color 0.2s, transform 0.2s;
 }
-@keyframes floatUp {
-    from{transform:translateY(105vh) scale(1);opacity:.85}
-    to{transform:translateY(-8vh) scale(0);opacity:0}
+.close-btn:hover { color:#FFD700; transform:scale(1.15); }
+
+.ptcl {
+    position: absolute;
+    border-radius: 50%;
+    animation: rise linear infinite;
+    pointer-events: none;
+}
+@keyframes rise {
+    from { transform:translateY(108vh) scale(1); opacity:.9; }
+    to   { transform:translateY(-10vh) scale(0); opacity:0; }
 }
 </style>
 </head>
 <body>
-<div id="domain-overlay">
-  <div class="domain-bg"></div>
-  <div class="crack" style="top:18%;transform:rotate(-13deg);"></div>
-  <div class="crack" style="top:33%;transform:rotate(7deg);opacity:.55;"></div>
-  <div class="crack" style="top:62%;transform:rotate(-6deg);opacity:.65;"></div>
-  <div class="crack" style="top:82%;transform:rotate(11deg);opacity:.45;"></div>
-  <div class="curse-circle" style="width:260px;height:260px;animation-duration:5s;"></div>
-  <div class="curse-circle" style="width:460px;height:460px;animation-duration:9s;animation-direction:reverse;"></div>
-  <div class="curse-circle" style="width:660px;height:660px;animation-duration:13s;border-style:dashed;"></div>
-  <div class="curse-circle" style="width:860px;height:860px;animation-duration:17s;animation-direction:reverse;border-style:dotted;"></div>
-  <div class="domain-text"     id="dom-main">領域展開</div>
-  <div class="domain-subtitle" id="dom-sub">無量空処</div>
-  <div id="ptcl"></div>
-  <span class="domain-close-btn" onclick="closeDomain()">✕</span>
+<div id="overlay">
+  <div class="bg" id="dyn-bg"></div>
+
+  <div class="crack" id="c1"></div>
+  <div class="crack" id="c2"></div>
+  <div class="crack" id="c3"></div>
+  <div class="crack" id="c4"></div>
+
+  <div class="ring" id="r1"></div>
+  <div class="ring" id="r2"></div>
+  <div class="ring" id="r3"></div>
+  <div class="ring" id="r4"></div>
+
+  <div class="main-txt" id="main-txt">領域展開</div>
+  <div class="sub-txt"  id="sub-txt">無量空処</div>
+
+  <div id="particles"></div>
+  <span class="close-btn" onclick="closeOverlay()">✕</span>
 </div>
 
 <script>
-function mkParticles(){
-  var c=document.getElementById('ptcl');
-  if(!c)return; c.innerHTML='';
-  for(var i=0;i<55;i++){
-    var p=document.createElement('div');
-    p.className='particle';
-    var s=Math.random()*7+2;
-    var isOrange=Math.random()>.5;
-    p.style.cssText='width:'+s+'px;height:'+s+'px;left:'+(Math.random()*100)
-      +'%;animation-duration:'+(Math.random()*4+3)+'s;animation-delay:'
-      +(Math.random()*3)+'s;background:rgba('
-      +(isOrange?'255,69,0':'255,215,0')+',0.8);';
-    c.appendChild(p);
-  }
+var THEMES = {
+    blue:   { bg:'rgba(0,50,120,0.96)',  crack:'#00BFFF', ring:'rgba(0,191,255,0.5)' },
+    dark:   { bg:'rgba(10,0,30,0.97)',   crack:'#7B2FBE', ring:'rgba(123,47,190,0.5)' },
+    red:    { bg:'rgba(139,0,0,0.96)',   crack:'#FF4500', ring:'rgba(255,69,0,0.55)' },
+    crimson:{ bg:'rgba(100,0,0,0.97)',   crack:'#DC143C', ring:'rgba(220,20,60,0.5)' },
+    purple: { bg:'rgba(40,0,80,0.97)',   crack:'#9B59B6', ring:'rgba(155,89,182,0.5)' }
+};
+
+function applyTheme(t) {
+    var theme = THEMES[t] || THEMES.red;
+    var bg = document.getElementById('dyn-bg');
+    if (bg) bg.style.background =
+        'radial-gradient(ellipse at center,' + theme.bg + ' 0%,rgba(0,0,0,0.99) 100%)';
+
+    var cracks = [
+        {id:'c1', top:'17%', rot:'-14deg', op:'1'},
+        {id:'c2', top:'34%', rot:'8deg',   op:'.5'},
+        {id:'c3', top:'63%', rot:'-5deg',  op:'.65'},
+        {id:'c4', top:'83%', rot:'12deg',  op:'.4'}
+    ];
+    cracks.forEach(function(c) {
+        var el = document.getElementById(c.id);
+        if (!el) return;
+        el.style.top = c.top;
+        el.style.transform = 'rotate(' + c.rot + ')';
+        el.style.opacity = c.op;
+        el.style.background =
+            'linear-gradient(90deg,transparent,' + theme.crack + ',transparent)';
+    });
+
+    var rings = [
+        {id:'r1', size:'280px', dur:'5s',  dir:'normal',  style:'solid'},
+        {id:'r2', size:'500px', dur:'9s',  dir:'reverse', style:'solid'},
+        {id:'r3', size:'720px', dur:'13s', dir:'normal',  style:'dashed'},
+        {id:'r4', size:'940px', dur:'17s', dir:'reverse', style:'dotted'}
+    ];
+    rings.forEach(function(r) {
+        var el = document.getElementById(r.id);
+        if (!el) return;
+        el.style.width  = r.size;
+        el.style.height = r.size;
+        el.style.border = '2px ' + r.style + ' ' + theme.ring;
+        el.style.animationDuration  = r.dur;
+        el.style.animationDirection = r.dir;
+    });
 }
-function activateDomain(main,sub){
-  var o=document.getElementById('domain-overlay');
-  var m=document.getElementById('dom-main');
-  var s=document.getElementById('dom-sub');
-  if(!o)return;
-  if(m&&main)m.textContent=main;
-  if(s&&sub)s.textContent=sub;
-  mkParticles();
-  o.classList.add('active');
-  try{playSound();}catch(e){}
-  clearTimeout(window._dt);
-  window._dt=setTimeout(closeDomain,10000);
+
+function makeParticles(crackColor) {
+    var c = document.getElementById('particles');
+    if (!c) return;
+    c.innerHTML = '';
+    for (var i = 0; i < 60; i++) {
+        var p = document.createElement('div');
+        p.className = 'ptcl';
+        var s = Math.random() * 8 + 2;
+        var useAccent = Math.random() > 0.5;
+        p.style.cssText =
+            'width:' + s + 'px;height:' + s + 'px;' +
+            'left:' + (Math.random() * 100) + '%;' +
+            'animation-duration:' + (Math.random() * 5 + 3) + 's;' +
+            'animation-delay:' + (Math.random() * 4) + 's;' +
+            'background:rgba(' + (useAccent ? '255,215,0' : crackColor) + ',0.85);';
+        c.appendChild(p);
+    }
 }
-function closeDomain(){
-  var o=document.getElementById('domain-overlay');
-  if(o)o.classList.remove('active');
+
+function openOverlay(main, sub, theme) {
+    var o  = document.getElementById('overlay');
+    var mt = document.getElementById('main-txt');
+    var st = document.getElementById('sub-txt');
+    if (!o) return;
+
+    if (mt) mt.textContent = main || '領域展開';
+    if (st) st.textContent = sub  || '';
+
+    // 애니메이션 재시작
+    if (mt) { mt.style.animation = 'none'; mt.offsetHeight; mt.style.animation = ''; }
+    if (st) { st.style.animation = 'none'; st.offsetHeight; st.style.animation = ''; }
+
+    var t = theme || 'red';
+    applyTheme(t);
+
+    var themeObj = THEMES[t] || THEMES.red;
+    var crackRGB = themeObj.crack.replace('#','');
+    var r = parseInt(crackRGB.substring(0,2),16);
+    var g = parseInt(crackRGB.substring(2,4),16);
+    var b = parseInt(crackRGB.substring(4,6),16);
+    makeParticles(r+','+g+','+b);
+
+    o.classList.add('on');
+    try { playSound(); } catch(e) {}
+    clearTimeout(window._autoClose);
+    window._autoClose = setTimeout(closeOverlay, 12000);
 }
-function playSound(){
-  var ctx=new(window.AudioContext||window.webkitAudioContext)();
-  var o1=ctx.createOscillator(),g1=ctx.createGain();
-  o1.type='sawtooth';
-  o1.frequency.setValueAtTime(65,ctx.currentTime);
-  o1.frequency.exponentialRampToValueAtTime(18,ctx.currentTime+1.8);
-  g1.gain.setValueAtTime(0.45,ctx.currentTime);
-  g1.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.8);
-  o1.connect(g1);g1.connect(ctx.destination);
-  o1.start();o1.stop(ctx.currentTime+1.8);
-  var o2=ctx.createOscillator(),g2=ctx.createGain();
-  o2.type='square';
-  o2.frequency.setValueAtTime(900,ctx.currentTime);
-  o2.frequency.exponentialRampToValueAtTime(180,ctx.currentTime+0.6);
-  g2.gain.setValueAtTime(0.22,ctx.currentTime);
-  g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.6);
-  o2.connect(g2);g2.connect(ctx.destination);
-  o2.start();o2.stop(ctx.currentTime+0.6);
+
+function closeOverlay() {
+    var o = document.getElementById('overlay');
+    if (o) o.classList.remove('on');
 }
-window.addEventListener('message',function(e){
-  if(!e.data)return;
-  if(e.data.type==='ACTIVATE')activateDomain(e.data.main,e.data.sub);
-  if(e.data.type==='CLOSE')closeDomain();
+
+function playSound() {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var o1 = ctx.createOscillator(), g1 = ctx.createGain();
+    o1.type = 'sawtooth';
+    o1.frequency.setValueAtTime(65, ctx.currentTime);
+    o1.frequency.exponentialRampToValueAtTime(18, ctx.currentTime + 2);
+    g1.gain.setValueAtTime(0.5, ctx.currentTime);
+    g1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2);
+    o1.connect(g1); g1.connect(ctx.destination);
+    o1.start(); o1.stop(ctx.currentTime + 2);
+
+    var o2 = ctx.createOscillator(), g2 = ctx.createGain();
+    o2.type = 'square';
+    o2.frequency.setValueAtTime(1000, ctx.currentTime);
+    o2.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.7);
+    g2.gain.setValueAtTime(0.25, ctx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+    o2.connect(g2); g2.connect(ctx.destination);
+    o2.start(); o2.stop(ctx.currentTime + 0.7);
+}
+
+window.addEventListener('message', function(e) {
+    if (!e.data) return;
+    if (e.data.type === 'ACTIVATE') openOverlay(e.data.main, e.data.sub, e.data.theme);
+    if (e.data.type === 'CLOSE')    closeOverlay();
 });
 </script>
 </body>
-</html>
-""", height=0, scrolling=False)
+</html>"""
+
+st.components.v1.html(OVERLAY_HTML, height=0, scrolling=False)
 
 # ──────────────────────────────────────────
 # 영역전개 데이터
 # ──────────────────────────────────────────
 DOMAINS = {
-    "무량공처 — 고죠 사토루": {
-        "main": "無量空処",
-        "sub": "「私が最強ですので」",
-        "desc": "무한을 내재화하여 감각 정보를 무한히 처리하게 만들어 뇌를 마비시킨다.",
-        "color": "#00BFFF",
-        "pose": "양손 손가락을 서로 교차해 맞잡는 형태 (양손 모두 손가락 펴기)",
-        "ai_keyword": ["양손 교차", "손가락 맞잡기", "interlocked fingers", "clasp hands"],
-        "emoji": "🔵",
+    "무량공처": {
+        "main":     "無量空処",
+        "sub":      "「私が最強ですので」",
+        "char":     "고죠 사토루",
+        "color":    "#00BFFF",
+        "theme":    "blue",
+        "pose":     "양손 손가락을 서로 교차해 맞잡기",
+        "keywords": ["양손 교차", "interlocked", "clasp", "두 손 맞잡기"],
+        "emoji":    "🔵",
     },
-    "폐옥염정 — 후시구로 메구미": {
-        "main": "嵌合暗翳庭",
-        "sub": "「十種影法術」",
-        "desc": "십종영법술로 만든 식신들의 세계를 펼친다.",
-        "color": "#4B0082",
-        "pose": "검지+중지만 펴고 나머지 손가락 접기 (인/印 모양)",
-        "ai_keyword": ["검지 중지", "두 손가락", "peace sign", "victory sign", "인 모양"],
-        "emoji": "🌑",
+    "폐옥염정": {
+        "main":     "嵌合暗翳庭",
+        "sub":      "「十種影法術」",
+        "char":     "후시구로 메구미",
+        "color":    "#7B2FBE",
+        "theme":    "dark",
+        "pose":     "검지+중지만 펴고 나머지 접기 (인/印)",
+        "keywords": ["검지 중지", "peace sign", "victory", "두 손가락"],
+        "emoji":    "🌑",
     },
-    "흉흉욕식 — 조로": {
-        "main": "凶凶呪胎",
-        "sub": "「特級呪霊」",
-        "desc": "용암과 화염으로 가득한 세계를 펼친다.",
-        "color": "#FF4500",
-        "pose": "양손 모든 손가락 활짝 펴기",
-        "ai_keyword": ["양손 활짝", "모든 손가락", "both hands open", "spread fingers"],
-        "emoji": "🔥",
+    "흉흉욕식": {
+        "main":     "凶凶呪胎",
+        "sub":      "「特級呪霊」",
+        "char":     "조로",
+        "color":    "#FF4500",
+        "theme":    "red",
+        "pose":     "양손 모든 손가락 활짝 펴기",
+        "keywords": ["양손 활짝", "spread fingers", "open hands", "모든 손가락"],
+        "emoji":    "🔥",
     },
-    "자충玫 — 쿠기사키 노바라": {
-        "main": "蝶蛆嵐",
-        "sub": "「共鳴り」",
-        "desc": "못을 통해 원거리 타격하는 공명 기법.",
-        "color": "#8B0000",
-        "pose": "한 손 주먹 + 다른 손 검지만 펴서 가리키기",
-        "ai_keyword": ["주먹", "검지", "pointing", "fist and index", "가리키기"],
-        "emoji": "🔴",
+    "자충玫": {
+        "main":     "蝶蛆嵐",
+        "sub":      "「共鳴り」",
+        "char":     "쿠기사키 노바라",
+        "color":    "#DC143C",
+        "theme":    "crimson",
+        "pose":     "한 손 주먹 + 다른 손 검지만 펴서 가리키기",
+        "keywords": ["주먹 검지", "fist pointing", "주먹과 검지"],
+        "emoji":    "🔴",
     },
-    "자수밀원 — 마히토": {
-        "main": "自閉円頓裹",
-        "sub": "「無為転変」",
-        "desc": "영혼을 직접 조작하는 무위전변.",
-        "color": "#9B59B6",
-        "pose": "한 손으로 주먹 쥐기 (모든 손가락 접기)",
-        "ai_keyword": ["주먹", "fist", "closed hand", "손가락 모두 접기"],
-        "emoji": "🟣",
+    "자수밀원": {
+        "main":     "自閉円頓裹",
+        "sub":      "「無為転変」",
+        "char":     "마히토",
+        "color":    "#9B59B6",
+        "theme":    "purple",
+        "pose":     "한 손 주먹 쥐기 (모든 손가락 접기)",
+        "keywords": ["주먹", "fist", "closed hand", "손가락 접기"],
+        "emoji":    "🟣",
     },
 }
 
 # ──────────────────────────────────────────
-# Claude API 함수들
+# JS 헬퍼
 # ──────────────────────────────────────────
-def pil_to_base64(img: Image.Image, fmt: str = "JPEG") -> str:
-    """PIL 이미지를 base64 문자열로 변환."""
+def fire_domain_js(main: str, sub: str, theme: str = "red"):
+    safe_main  = main.replace("'", "\\'")
+    safe_sub   = sub.replace("'", "\\'")
+    safe_theme = theme.replace("'", "\\'")
+    html = (
+        "<script>(function(){"
+        "var m={type:'ACTIVATE',"
+        "main:'" + safe_main + "',"
+        "sub:'" + safe_sub + "',"
+        "theme:'" + safe_theme + "'};"
+        "if(window.parent&&window.parent!==window)"
+        "window.parent.postMessage(m,'*');"
+        "})();</script>"
+    )
+    st.components.v1.html(html, height=0, scrolling=False)
+
+
+def close_domain_js():
+    html = (
+        "<script>(function(){"
+        "if(window.parent&&window.parent!==window)"
+        "window.parent.postMessage({type:'CLOSE'},'*');"
+        "})();</script>"
+    )
+    st.components.v1.html(html, height=0, scrolling=False)
+
+
+# ──────────────────────────────────────────
+# Claude Vision 손동작 분석
+# ──────────────────────────────────────────
+def pil_to_base64(img: Image.Image) -> str:
     buf = io.BytesIO()
-    rgb_img = img.convert("RGB")
-    rgb_img.save(buf, format=fmt, quality=85)
+    img.convert("RGB").save(buf, format="JPEG", quality=85)
     return base64.standard_b64encode(buf.getvalue()).decode("utf-8")
 
 
-def analyze_hand_gesture(api_key: str, img: Image.Image) -> dict:
-    """
-    Claude Vision으로 손동작을 분석하여 영역전개 매칭 결과 반환.
-    반환: { "detected": bool, "domain": str|None, "confidence": float,
-             "description": str, "hand_desc": str }
-    """
+def analyze_gesture(api_key: str, img: Image.Image) -> dict:
     client = anthropic.Anthropic(api_key=api_key)
 
-    domain_list = "\n".join([
-        f"- {name}: {data['pose']} (키워드: {', '.join(data['ai_keyword'][:3])})"
-        for name, data in DOMAINS.items()
-    ])
+    lines = []
+    for name, data in DOMAINS.items():
+        kw = ", ".join(data["keywords"][:3])
+        lines.append("- " + name + " (" + data["char"] + "): " + data["pose"] + " / 키워드: " + kw)
+    domain_str = "\n".join(lines)
 
-    prompt = f"""이 이미지에서 손동작을 분석해주세요.
-
-분석 대상 영역전개 손동작 목록:
-{domain_list}
-
-다음 JSON 형식으로만 응답하세요 (다른 텍스트 없이):
-{{
-  "hand_detected": true/false,
-  "hand_description": "손동작에 대한 간단한 설명",
-  "matched_domain": "매칭된 영역전개 이름 (없으면 null)",
-  "confidence": 0.0~1.0,
-  "reason": "매칭 이유 또는 미매칭 이유"
-}}
-
-손이 보이지 않으면 hand_detected를 false로 설정하세요.
-신뢰도 0.7 이상일 때만 matched_domain을 설정하세요."""
-
-    img_b64 = pil_to_base64(img)
+    prompt = (
+        "이미지에서 손동작을 분석해 아래 영역전개 중 하나와 매칭하세요.\n\n"
+        "목록:\n" + domain_str + "\n\n"
+        "JSON만 출력 (다른 텍스트 없음):\n"
+        '{"hand_detected":true/false,'
+        '"hand_description":"손동작 설명",'
+        '"matched_domain":"매칭 이름 또는 null",'
+        '"confidence":0.0~1.0,'
+        '"reason":"이유"}\n\n'
+        "손 없으면 hand_detected=false. 신뢰도 0.7 미만이면 matched_domain=null."
+    )
 
     try:
         response = client.messages.create(
             model="claude-sonnet-4-5",
-            max_tokens=512,
+            max_tokens=400,
             messages=[{
                 "role": "user",
                 "content": [
@@ -470,7 +534,7 @@ def analyze_hand_gesture(api_key: str, img: Image.Image) -> dict:
                         "source": {
                             "type": "base64",
                             "media_type": "image/jpeg",
-                            "data": img_b64,
+                            "data": pil_to_base64(img),
                         },
                     },
                     {"type": "text", "text": prompt},
@@ -479,5 +543,4 @@ def analyze_hand_gesture(api_key: str, img: Image.Image) -> dict:
         )
 
         raw = response.content[0].text.strip()
-        # JSON 블록 추출
         if "
