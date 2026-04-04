@@ -13,27 +13,11 @@ mp_draw = mp.solutions.drawing_utils
 
 
 def is_muryokusho(hand_landmarks):
-    """
-    무량공처 손 모양 감지:
-    - 검지(8), 중지(12) 펴져 있음
-    - 중지 끝이 검지 끝과 x좌표가 교차하거나 매우 가까움 (겹친 상태)
-    - 약지(16), 새끼(20) 접혀 있음
-    - 엄지(4) 접혀 있음
-    """
+    """검지, 중지 두 손가락만 펴져 있으면 인식"""
     lm = hand_landmarks.landmark
-
-    # 검지, 중지 펴져 있는지
     index_up = lm[8].y < lm[6].y
     middle_up = lm[12].y < lm[10].y
-
-    # 약지, 새끼 접혀 있는지
-    ring_down = lm[16].y > lm[14].y
-    pinky_down = lm[20].y > lm[18].y
-
-    # 중지가 검지 위로 교차: 두 손가락 끝의 x 거리가 가깝거나 중지가 검지보다 왼쪽
-    crossed = abs(lm[12].x - lm[8].x) < 0.15
-
-    return index_up and middle_up and ring_down and pinky_down and crossed
+    return index_up and middle_up
 
 
 class HandGestureProcessor(VideoProcessorBase):
