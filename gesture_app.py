@@ -143,6 +143,15 @@ WAIT_HTML = """
 </div>
 """
 
+YOUTUBE_HTML = """
+<iframe width="100%" height="420"
+    src="https://www.youtube.com/embed/NOjxJ16d6NA?autoplay=1"
+    frameborder="0"
+    allow="autoplay; encrypted-media"
+    allowfullscreen>
+</iframe>
+"""
+
 with col1:
     ctx = webrtc_streamer(
         key="hand-gesture",
@@ -150,12 +159,17 @@ with col1:
         media_stream_constraints={"video": True, "audio": False},
         async_processing=True,
     )
+    status_placeholder = st.empty()
+    if ctx.video_processor and ctx.video_processor.gesture_label == "무량공처":
+        status_placeholder.markdown("## 🔮 영역전개 실행!")
+    else:
+        status_placeholder.markdown("")
 
 with col2:
     st.subheader("영역전개")
     area_placeholder = st.empty()
 
     if ctx.video_processor and ctx.video_processor.gesture_label == "무량공처":
-        area_placeholder.video("https://youtu.be/NOjxJ16d6NA")
+        area_placeholder.markdown(YOUTUBE_HTML, unsafe_allow_html=True)
     else:
         area_placeholder.markdown(WAIT_HTML, unsafe_allow_html=True)
