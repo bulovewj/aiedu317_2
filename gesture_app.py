@@ -48,7 +48,7 @@ class HandGestureProcessor(VideoProcessorBase):
                 y = int(hand_landmarks.landmark[0].y * h) - 20
                 if detected:
                     color = (0, 255, 255)
-                    cv2.putText(img, "무량공처!", (x - 40, y),
+                    cv2.putText(img, "Unlimited Void!", (x - 60, y),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
         self.gesture_label = "무량공처" if detected else ""
@@ -160,16 +160,25 @@ with col1:
         async_processing=True,
     )
     status_placeholder = st.empty()
-    if ctx.video_processor and ctx.video_processor.gesture_label == "무량공처":
-        status_placeholder.markdown("## 🔮 영역전개 실행!")
-    else:
-        status_placeholder.markdown("")
 
 with col2:
     st.subheader("영역전개")
     area_placeholder = st.empty()
 
-    if ctx.video_processor and ctx.video_processor.gesture_label == "무량공처":
-        area_placeholder.markdown(YOUTUBE_HTML, unsafe_allow_html=True)
-    else:
-        area_placeholder.markdown(WAIT_HTML, unsafe_allow_html=True)
+detected = (
+    ctx.video_processor is not None
+    and ctx.video_processor.gesture_label == "무량공처"
+)
+
+if detected:
+    status_placeholder.markdown("## 🔮 영역전개 실행!")
+    area_placeholder.markdown(YOUTUBE_HTML, unsafe_allow_html=True)
+else:
+    status_placeholder.markdown("")
+    area_placeholder.markdown(WAIT_HTML, unsafe_allow_html=True)
+
+# 웹캠 실행 중일 때 자동 새로고침
+if ctx.state.playing:
+    import time
+    time.sleep(1)
+    st.rerun()
