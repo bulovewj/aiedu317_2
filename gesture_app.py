@@ -6,7 +6,7 @@ from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 
 st.set_page_config(page_title="고죠 사토루 - 무량공처", layout="wide")
 st.title("고죠 사토루의 영역전개")
-st.markdown("양손을 카메라 앞에 펼쳐 무량공처 손 모양을 만들어보세요!")
+st.markdown("고죠 사토루의 영역전개를 실행해보세요!")
 
 mp_hands = mp.solutions.hands
 mp_draw = mp.solutions.drawing_utils
@@ -31,7 +31,7 @@ def is_muryokusho(hand_landmarks):
     pinky_down = lm[20].y > lm[18].y
 
     # 중지가 검지 위로 교차: 두 손가락 끝의 x 거리가 가깝거나 중지가 검지보다 왼쪽
-    crossed = abs(lm[12].x - lm[8].x) < 0.08
+    crossed = abs(lm[12].x - lm[8].x) < 0.15
 
     return index_up and middle_up and ring_down and pinky_down and crossed
 
@@ -172,6 +172,6 @@ with col2:
     area_placeholder = st.empty()
 
     if ctx.video_processor and ctx.video_processor.gesture_label == "무량공처":
-        area_placeholder.markdown(VOID_HTML, unsafe_allow_html=True)
+        area_placeholder.video("https://youtu.be/NOjxJ16d6NA")
     else:
         area_placeholder.markdown(WAIT_HTML, unsafe_allow_html=True)
