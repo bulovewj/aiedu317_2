@@ -157,7 +157,7 @@ WAIT_HTML = """
     font-family: serif;
     border: 1px solid #222;
 ">
-    양손을 펼치면 영역전개가 시작됩니다
+    검지와 중지를 올리면 영역전개가 시작됩니다
 </div>
 """
 
