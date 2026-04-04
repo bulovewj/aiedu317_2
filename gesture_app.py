@@ -13,11 +13,13 @@ mp_draw = mp.solutions.drawing_utils
 
 
 def is_muryokusho(hand_landmarks):
-    """검지, 중지 두 손가락만 펴져 있으면 인식"""
+    """검지, 중지만 펴져 있고 나머지는 접혀 있을 때 인식"""
     lm = hand_landmarks.landmark
     index_up = lm[8].y < lm[6].y
     middle_up = lm[12].y < lm[10].y
-    return index_up and middle_up
+    ring_down = lm[16].y > lm[14].y
+    pinky_down = lm[20].y > lm[18].y
+    return index_up and middle_up and ring_down and pinky_down
 
 
 class HandGestureProcessor(VideoProcessorBase):
@@ -28,8 +30,10 @@ class HandGestureProcessor(VideoProcessorBase):
             min_tracking_confidence=0.5,
         )
         self.gesture_label = ""
+        self.gesture_start_time = None
 
     def recv(self, frame):
+        import time
         img = frame.to_ndarray(format="bgr24")
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         results = self.hands.process(img_rgb)
@@ -40,18 +44,32 @@ class HandGestureProcessor(VideoProcessorBase):
                 if is_muryokusho(hand_landmarks):
                     detected = True
 
+        now = time.time()
+        if detected:
+            if self.gesture_start_time is None:
+                self.gesture_start_time = now
+            elapsed = now - self.gesture_start_time
+            held = elapsed >= 3.0
+        else:
+            self.gesture_start_time = None
+            elapsed = 0
+            held = False
+
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 mp_draw.draw_landmarks(img, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                 h, w, _ = img.shape
                 x = int(hand_landmarks.landmark[0].x * w)
                 y = int(hand_landmarks.landmark[0].y * h) - 20
-                if detected:
-                    color = (0, 255, 255)
+                if detected and not held:
+                    remaining = int(3 - elapsed) + 1
+                    cv2.putText(img, f"Hold... {remaining}s", (x - 60, y),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 200, 255), 2)
+                elif held:
                     cv2.putText(img, "Unlimited Void!", (x - 60, y),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
 
-        self.gesture_label = "무량공처" if detected else ""
+        self.gesture_label = "무량공처" if held else ""
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 
